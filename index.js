@@ -45,9 +45,9 @@ const {
 
 const fs = require('fs');
 
-const TOKEN = process.env.TOKEN;
-const CLIENT_ID = process.env.CLIENTID;
-const GUILD_ID = process.env.GUILD_ID;
+const TOKEN = process.env['TOKEN'];
+const CLIENT_ID = process.env['CLIENTID'];
+const GUILD_ID = process.env['GUILD_ID'];
 
 var prefix = config.prefix;
 var volume = config.volume;
