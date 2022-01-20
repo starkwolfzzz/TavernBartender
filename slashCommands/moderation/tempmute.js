@@ -94,7 +94,7 @@ module.exports = {
         setTimeout(() => {
             user.roles.remove(interaction.guild.roles.cache.find(role => role.name === "muted"));
             roles.forEach(rol => {
-                if (rol != "@everyone" && !user.roles.cache.find(role => role.name === rol).managed) user.roles.add(interaction.guild.roles.cache.find(role => role.name === rol));
+                if (rol != "@everyone" && !user.roles.cache.find(role => role.name === rol) || !user.roles.cache.find(role => role.name === rol).managed) user.roles.add(interaction.guild.roles.cache.find(role => role.name === rol));
             });
             interaction.editReply({ content: `Unmuted <@${interaction.options.getUser('user').id}>` })
         }, time * 1000);
