@@ -1,3 +1,5 @@
+const guildSchema = require("../../schemas/guildSchema")
+
 module.exports = {
     name: 'messageCreate',
     async execute(client, message) {
@@ -7,8 +9,14 @@ module.exports = {
 
         var args;
 
-        if (!message.content.startsWith(client.prefix)) return;
-        args = message.content.slice(client.prefix.length).split(/ +/);
+        const searchById = guildSchema.find({
+            guildID: message.guild.id,
+        })
+
+        var prefix = (await searchById)[0].guildPrefix;
+
+        if (!message.content.startsWith(prefix)) return;
+        args = message.content.slice(prefix.length).split(/ +/);
         const command = args.shift().toLowerCase();
 
         const cmd = client.commands.get(command);

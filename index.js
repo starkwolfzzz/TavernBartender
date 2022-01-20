@@ -9,7 +9,6 @@ app.listen(port /*, () => console.log(`app listening at http://localhost:${port}
 // ================= START BOT CODE ===================
 
 require('dotenv').config();
-const config = require("./config.json");
 
 const {
     Client,
@@ -67,8 +66,6 @@ client.player = player;
 const fs = require('fs');
 const path = require('path');
 
-client.volume = config.volume;
-client.prefix = config.prefix;
 client.ttsPlayer = createAudioPlayer();
 
 var loop = "none";

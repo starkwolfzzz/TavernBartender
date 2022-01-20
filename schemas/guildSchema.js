@@ -8,7 +8,8 @@ const reqString = {
 const guildSchema = mongoose.Schema({
     guildID: reqString,
     guildName: reqString,
-    guildPrefix: reqString
+    guildPrefix: reqString,
+    guildVolume: reqString
 })
 
 module.exports = mongoose.model('guilds', guildSchema)

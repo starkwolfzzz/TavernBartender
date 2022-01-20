@@ -1,4 +1,5 @@
 const guildSchema = require("../../schemas/guildSchema")
+const config = require("../../config.json");
 
 module.exports = {
     name: 'ready',
@@ -34,7 +35,8 @@ module.exports = {
                     const guild = {
                         guildID: mainGuild.id,
                         guildName: mainGuild.name,
-                        guildPrefix: "_"
+                        guildPrefix: config.prefix,
+                        guildVolume: config.volume
                     }
     
                     await new guildSchema(guild).save()
