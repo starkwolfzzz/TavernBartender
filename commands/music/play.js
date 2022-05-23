@@ -1,3 +1,5 @@
+const guildSchema = require("../../schemas/guildSchema")
+
 module.exports = {
     name: "play",
     description: "Plays music",
@@ -19,7 +21,7 @@ module.exports = {
                             queue.stop();
                     });
 
-                    queue.setVolume(client.volume)
+                    queue.setVolume((await guildSchema.find({guildID: message.guild.id}))[0].guildVolume)
 
                     // if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
                     // else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)
@@ -42,7 +44,7 @@ module.exports = {
                             queue.stop();
                     });
 
-                    queue.setVolume(client.volume)
+                    queue.setVolume((await guildSchema.find({guildID: message.guild.id}))[0].guildVolume)
 
                     // if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
                     // else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)
@@ -57,7 +59,7 @@ module.exports = {
                         queue.stop();
                 });
 
-                queue.setVolume(client.volume)
+                queue.setVolume((await guildSchema.find({guildID: message.guild.id}))[0].guildVolume)
 
                 // if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
                 // else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)

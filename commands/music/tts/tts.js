@@ -9,6 +9,7 @@ const {
 } = require('@discordjs/voice');
 const request = require(`request`);
 const fs = require(`fs`);
+const guildSchema = require("../../../schemas/guildSchema")
 
 module.exports = {
     name: "tts",
@@ -16,7 +17,7 @@ module.exports = {
     async execute(client, message, args) {
         const voiceChannel = message.member.voice.channel;
         if (voiceChannel != null) {
-            if (client.player.getQueue(message.guild.id) == null || client.player.getQueue(message.guild.id).isPlaying == false) {
+            if (client.distube.getQueue(message.guild.id) == null || client.distube.getQueue(message.guild.id).isPlaying == false) {
                 if (client.ttsPlayer.state.status == "playing") {
                     message.react("❌")
                 } else {
@@ -106,7 +107,7 @@ module.exports = {
 
             const connection1 = getVoiceConnection(voiceChannel.guild.id);
             var resource = createAudioResource(path, { inlineVolume: true });
-            resource.volume.setVolume(client.volume / 100);
+            resource.volume.setVolume((await guildSchema.find({guildID: message.guild.id}))[0].guildVolume / 100);
             await client.ttsPlayer.play(resource);
             connection1.subscribe(client.ttsPlayer);
 

@@ -5,7 +5,13 @@ const reqString = {
     required: true
 }
 
+const reqInt = {
+    type: Number,
+    required: true
+}
+
 const guildSchema = mongoose.Schema({
+    docID: reqInt,
     guildID: reqString,
     guildName: reqString,
     guildPrefix: reqString,

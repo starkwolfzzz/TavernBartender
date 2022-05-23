@@ -1,24 +1,16 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
+    name: "autoplay",
+    description: "Get or set autoplay",
     options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
+        name: "toggle",
+        description: "Toggle autoplay state",
         type: "STRING",
         choices: [{
-                name: "None",
-                value: "none"
+                name: "Toggle",
+                value: "toggle"
             },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
         ]
     }],
     /**
@@ -28,8 +20,6 @@ module.exports = {
      */
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
 
         const voiceChannel = member.voice.channel;
 
@@ -56,32 +46,22 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
+        if(!options.getString("toggle")){
             var embed = new MessageEmbed()
                 .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+                .setDescription(`☑️ | Autoplay set to: \`${queue.autoplay ? 'On' : 'Off'}\``)
+
+            return interaction.reply({ embeds: [embed] })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
-
+            const autoplay = queue.toggleAutoplay();
             var embed = new MessageEmbed()
                 .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setDescription(`☑️ | Set Autoplay to: \`${autoplay ? 'On' : 'Off'}\``)
 
-            return interaction.reply({ embeds: [embed] })
+            interaction.reply({ embeds: [embed] })
 
         } catch (e) {
             var errorEmbed = new MessageEmbed()

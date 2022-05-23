@@ -1,26 +1,8 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
-    options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
-    }],
+    name: "nowplaying",
+    description: "Display info about the song currently being played",
     /**
      * @param {CommandInteraction} interaction
      * @param {Client} client
@@ -28,8 +10,6 @@ module.exports = {
      */
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
 
         const voiceChannel = member.voice.channel;
 
@@ -56,30 +36,37 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
-        }
-
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
+            const status = async queue =>
+                `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.join(', ') || 'Off'}\` | Loop: \`${
+                queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'
+                }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``;
 
+            var duration = queue.songs[0].duration;
+            var currentTime = queue.currentTime;
+
+            var knobPlace = Math.ceil(currentTime / (duration / 10))
+            var knob = "🔘"
+            var slash = "▬"
+            var slashesBefore = knobPlace - 1;
+            var slashesAfter = 10 - knobPlace;
+
+            const song = queue.songs[0];
+            var knobStr = insertChar(slash, slashesBefore) + knob + insertChar(slash, slashesAfter)
+
+            var state = "";
+            if(queue.paused) state = "⏸️"
+            else state = "▶️"
+
+            var user = client.guilds.cache.get(queue.voiceChannel.guildId).members.cache.get(song.user.id).user;
             var embed = new MessageEmbed()
-                .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setColor("BLUE")
+                .setAuthor({ name: `Requested by: ${user.username}#${user.discriminator}`, iconURL: user.avatarURL() })
+                .setURL(song.url)
+                .setTitle(`Playing: ${song.name}`)
+                .setDescription(`${state} | ${knobStr} \`[${queue.formattedCurrentTime} / ${song.formattedDuration}]\`\n${await status(queue)}`)
+                .setImage(song.thumbnail)
 
             return interaction.reply({ embeds: [embed] })
 
@@ -92,4 +79,14 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed] })
         }
     }
+}
+
+function insertChar(char, frequency) {
+    var num = 0;
+    var c = "";
+    for (i = 0; i < frequency; i++) {
+        c += char;
+        num++
+    }
+    return (c);
 }

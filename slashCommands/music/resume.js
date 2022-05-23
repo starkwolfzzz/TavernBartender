@@ -1,35 +1,15 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
-    options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
-    }],
+    name: "resume",
+    description: "Resume music playback",
     /**
      * @param {CommandInteraction} interaction
      * @param {Client} client
      * @returns
      */
     async execute(client, interaction) {
-        const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
+        const { member, guild, channel } = interaction;
 
         const voiceChannel = member.voice.channel;
 
@@ -56,30 +36,19 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+        if(!queue.paused) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Music playback is already not paused.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
-
+            await queue.resume();
             var embed = new MessageEmbed()
                 .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setDescription(`☑️ | The queue has been resumed.`)
 
             return interaction.reply({ embeds: [embed] })
 

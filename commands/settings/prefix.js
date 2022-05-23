@@ -9,7 +9,7 @@ module.exports = {
         switch (true) {
             case (args.length == 0):
                 const searchById = guildSchema.find({
-                    guildID: message.guild.id,
+                    guildID: message.guild.id
                 })
 
                 var prefix = (await searchById)[0].guildPrefix;

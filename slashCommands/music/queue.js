@@ -1,25 +1,12 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
+    name: "queue",
+    description: "Shows current music queue",
     options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
+        name: "page",
+        description: "The page of the queue to show",
+        type: "INTEGER"
     }],
     /**
      * @param {CommandInteraction} interaction
@@ -29,7 +16,7 @@ module.exports = {
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
 
-        loop = options.getString("type");
+        page = options.getInteger("page");
 
         const voiceChannel = member.voice.channel;
 
@@ -56,30 +43,35 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
-        }
-
         try {
-
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
 
             var embed = new MessageEmbed()
                 .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setTitle(`🎶 Current Queue | ${queue.songs.length} Songs - \`${queue.formattedDuration}\``)
+
+            var numPages = Math.ceil(queue.songs.length / 10)
+            var q = "";
+
+            if (!page || page > numPages || page == 1 || page <= 0) {
+                for (i = 0; i < 10; i++) {
+                    if (i == 0) q += `**Playing:** \`${queue.songs[i].name}\` - \`${queue.songs[i].formattedDuration}\` (Requested by ${queue.songs[i].user})\n`
+                    else {
+                        if (queue.songs[i]) q += `**[${i}]:** \`${queue.songs[i].name}\` - \`${queue.songs[i].formattedDuration}\` (Requested by ${queue.songs[i].user})\n`
+                        else break;
+                    }
+                }
+
+                embed.setDescription(q);
+                embed.setFooter({ text: `Page 1/${numPages}` })
+            } else if (page > 1) {
+                for (i = (0 + (10 * (page - 1))); i < (10 + (10 * (page - 1))); i++) {
+                    if (queue.songs[i]) q += `**[${i}]:** \`${queue.songs[i].name}\` - \`${queue.songs[i].formattedDuration}\` (Requested by ${queue.songs[i].user})\n`
+                    else break;
+                }
+
+                embed.setDescription(q);
+                embed.setFooter({ text: `Page ${page}/${numPages}` })
+            }
 
             return interaction.reply({ embeds: [embed] })
 

@@ -9,6 +9,7 @@ const {
 const request = require(`request`);
 
 const fs = require('fs');
+const guildSchema = require("../../../schemas/guildSchema")
 
 module.exports = {
     name: 'messageCreate',
@@ -39,7 +40,7 @@ module.exports = {
                                         queue.stop();
                                 });
 
-                                queue.setVolume(client.volume)
+                                queue.setVolume((await guildSchema.find({ guildID: message.guild.id }))[0].guildVolume)
 
                                 if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
                                 else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)
@@ -62,7 +63,7 @@ module.exports = {
                                         queue.stop();
                                 });
 
-                                queue.setVolume(client.volume)
+                                queue.setVolume((await guildSchema.find({ guildID: message.guild.id }))[0].guildVolume)
 
                                 /*if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
                                 else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)*/
@@ -80,7 +81,7 @@ module.exports = {
                 args = message.content.split(/ +/);
                 voiceChannel = message.member.voice.channel;
                 if (voiceChannel != null) {
-                    if (client.player.getQueue(message.guild.id) == null) {
+                    if (client.distube.getQueue(message.guild.id) == null || client.distube.getQueue(message.guild.id).isPlaying == false) {
                         if (client.ttsPlayer.state.status == "playing") {
                             message.react("❌")
                         } else {
@@ -169,7 +170,7 @@ module.exports = {
 
                     const connection1 = getVoiceConnection(voiceChannel.guild.id);
                     var resource = createAudioResource(path, { inlineVolume: true });
-                    resource.volume.setVolume(client.volume / 100);
+                    resource.volume.setVolume((await guildSchema.find({ guildID: message.guild.id }))[0].guildVolume / 100);
                     await client.ttsPlayer.play(resource);
                     connection1.subscribe(client.ttsPlayer);
 
@@ -277,7 +278,7 @@ module.exports = {
 	
 						const connection1 = getVoiceConnection(voiceChannel.guild.id);
 						var resource = createAudioResource(path, { inlineVolume: true });
-						resource.volume.setVolume(client.volume / 100);
+						resource.volume.setVolume((await guildSchema.find({guildID: message.guild.id}))[0].guildVolume / 100);
 						await client.ttsPlayer.play(resource);
 						connection1.subscribe(client.ttsPlayer);
 	
@@ -293,7 +294,9 @@ module.exports = {
 					}
 					break;*/
             case "announcements":
-                message.crosspost()
+                if (message.channel.id === "757302622842781699") {
+                    message.crosspost()
+                }
                 break;
         }
     },

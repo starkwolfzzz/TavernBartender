@@ -1,25 +1,13 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
+    name: "seek",
+    description: "Seek to a specific part of the song",
     options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
+        name: "time",
+        description: "The time (in seconds) to seek to",
+        type: "INTEGER",
+        required: true,
     }],
     /**
      * @param {CommandInteraction} interaction
@@ -28,8 +16,6 @@ module.exports = {
      */
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
 
         const voiceChannel = member.voice.channel;
 
@@ -56,30 +42,28 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+        const time = options.getInteger("time");
+
+        if (time < 0) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Time to seek to must be 0 seconds or higher.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        }
+
+        if (time > queue.songs[0].duration) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Time to seek to must be within the duration of the current song.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
-
+            await queue.seek(time);
             var embed = new MessageEmbed()
                 .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setDescription(`☑️ | Sought to ${time} seconds of the current song.`)
 
             return interaction.reply({ embeds: [embed] })
 

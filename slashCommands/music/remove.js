@@ -1,25 +1,13 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
+    name: "remove",
+    description: "Remove a specific song from the queue",
     options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
+        name: "index",
+        description: "The index of the song to remove from the queue (get infex from /queue)",
+        type: "INTEGER",
+        required: true
     }],
     /**
      * @param {CommandInteraction} interaction
@@ -29,9 +17,8 @@ module.exports = {
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
 
-        loop = options.getString("type");
-
         const voiceChannel = member.voice.channel;
+        const index = options.getInteger("index");
 
         if (!voiceChannel) {
             var errorEmbed = new MessageEmbed()
@@ -56,30 +43,25 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+        if (index <= 0) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Index of song to remove has to be above 0.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        } else if(index >= queue.songs.length){
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Index of song to remove has to be within current queue's length.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
-
+            const song = queue.songs[index];
+            queue.songs.splice(index, 1);
             var embed = new MessageEmbed()
                 .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setDescription(`☑️ | \`${song.name}\` has been removed from the queue.`)
 
             return interaction.reply({ embeds: [embed] })
 

@@ -1,9 +1,14 @@
-const guildSchema = require("../../schemas/guildSchema")
-const config = require("../../config.json");
+const guildSchema = require("../../../schemas/guildSchema")
+const config = require("../../../config.json");
+const { Client } = require(`discord.js`)
 
 module.exports = {
     name: 'ready',
     once: true,
+    /**
+     * @param {Client} client
+     * @returns
+     */
     async execute(client) {
         var type = "streaming";
         client.user.setStatus("online");
@@ -15,11 +20,32 @@ module.exports = {
         //Slash commands
         topBars = 60;
         console.log(insertChar("_", topBars))
-        console.log("|" + insertChar(" ", Math.round(((topBars - 1) - (`Updated Slash Guilds`).length) / 2)) + "Updated Slash Guilds" + insertChar(" ", Math.floor(((topBars - 1) - (`Updated Slash Guilds`).length) / 2)) + "|")
+        console.log("|" + insertChar(" ", Math.round(((topBars - 1) - (`Updated Guilds`).length) / 2)) + "Updated Guilds" + insertChar(" ", Math.floor(((topBars - 1) - (`Updated Guilds`).length) / 2)) + "|")
         console.log("|" + insertChar("_", topBars - 1) + "|")
         console.log("|" + insertChar(" ", topBars - 1) + "|")
 
-        var bar = new Promise(async (resolve, reject) => {
+        //Delete guilds that the bot isn't on anymore
+        var deleted = false;
+        var docCount = (await guildSchema.countDocuments());
+        var x = 0;
+        for (i = 0; i < docCount; i++) {
+            if ((await guildSchema.find({ docID: i }))[0] && !client.guilds.cache.get((await guildSchema.find({ docID: i }))[0].guildID)) {
+                guildSchema.findOneAndDelete({ docID: i }).then(() => deleted = true);
+            }
+        }
+
+        if (deleted) {
+            client.guilds.cache.forEach(async guild => {
+                x = x + 1
+                await guildSchema.updateOne({
+                    guildID: guild.id
+                }, {
+                    docID: x - 1
+                })
+            });
+        }
+
+        var bar = new Promise(async(resolve, reject) => {
             var size = client.guilds.cache.size;
             var sizeW = size - 1;
             var n = 0;
@@ -30,15 +56,16 @@ module.exports = {
                 var searchById = guildSchema.find({
                     guildID: mainGuild.id,
                 })
-                
-                if((await searchById).length == 0){
+
+                if ((await searchById).length == 0) {
                     const guild = {
+                        docID: (await guildSchema.countDocuments()),
                         guildID: mainGuild.id,
                         guildName: mainGuild.name,
                         guildPrefix: config.prefix,
                         guildVolume: config.volume
                     }
-    
+
                     await new guildSchema(guild).save()
                 }
 
@@ -47,11 +74,10 @@ module.exports = {
                     guildID: mainGuild.id,
                 })
 
-                if((await searchById)[0].guildName != mainGuild.name){
+                if ((await searchById)[0].guildName != mainGuild.name) {
                     await guildSchema.updateOne({
                         guildID: mainGuild.id
-                    },
-                    {
+                    }, {
                         guildName: mainGuild.name
                     })
                 }
@@ -78,6 +104,7 @@ module.exports = {
 
                     mainGuild.commands.permissions.set({ fullPermissions })
                         .catch((error) => {
+                            console.log(error)
                             var neededSpace1 = Math.round(((topBars - 1) - ((mainGuild.name).length)) / 2);
                             var neededSpace2 = Math.floor(((topBars - 1) - ((mainGuild.name).length)) / 2);
                             console.log("|" + insertChar(" ", neededSpace1) + "\x1b[31m" + mainGuild.name + "\x1b[0m" + insertChar(" ", neededSpace2) + "|");
@@ -97,6 +124,16 @@ module.exports = {
                                 n += 1;
                             }
                         });
+                }).catch((error) => {
+                    console.log(error)
+                    var neededSpace1 = Math.round(((topBars - 1) - ((mainGuild.name).length)) / 2);
+                    var neededSpace2 = Math.floor(((topBars - 1) - ((mainGuild.name).length)) / 2);
+                    console.log("|" + insertChar(" ", neededSpace1) + "\x1b[31m" + mainGuild.name + "\x1b[0m" + insertChar(" ", neededSpace2) + "|");
+                    if (n == sizeW) {
+                        resolve()
+                    } else {
+                        n += 1;
+                    }
                 })
             }
         })
@@ -105,7 +142,7 @@ module.exports = {
             console.log("|" + insertChar(" ", topBars - 1) + "|")
             console.log(insertChar("‾", topBars))
 
-            console.info(`${client.user.tag} is ${client.user.presence.status} and is ${type} ${client.user.presence.activities[0]}`);
+            console.info(`\x1b[33m${client.user.tag} \x1b[0mis \x1b[32m${client.user.presence.status} \x1b[0mand is \x1b[35m${type} ${client.user.presence.activities[0]}\x1b[0m`);
         })
 
         function insertChar(char, frequency) {

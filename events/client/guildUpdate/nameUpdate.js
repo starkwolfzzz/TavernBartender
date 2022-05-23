@@ -1,4 +1,4 @@
-const guildSchema = require("../../schemas/guildSchema")
+const guildSchema = require("../../../schemas/guildSchema")
 
 module.exports = {
     name: 'guildUpdate',

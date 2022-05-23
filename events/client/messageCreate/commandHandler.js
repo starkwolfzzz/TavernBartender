@@ -1,4 +1,4 @@
-const guildSchema = require("../../schemas/guildSchema")
+const guildSchema = require("../../../schemas/guildSchema")
 
 module.exports = {
     name: 'messageCreate',
@@ -10,7 +10,7 @@ module.exports = {
         var args;
 
         const searchById = guildSchema.find({
-            guildID: message.guild.id,
+            guildID: message.guild.id
         })
 
         var prefix = (await searchById)[0].guildPrefix;

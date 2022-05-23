@@ -1,35 +1,15 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
-    options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
-    }],
+    name: "skip",
+    description: "Skip a song",
     /**
      * @param {CommandInteraction} interaction
      * @param {Client} client
      * @returns
      */
     async execute(client, interaction) {
-        const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
+        const { member, guild, channel } = interaction;
 
         const voiceChannel = member.voice.channel;
 
@@ -56,30 +36,27 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+        if (queue.songs.length <= 1 && !queue.autoplay) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | There are no queued songs to skip to.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
-
+            var song = queue.songs[0];
+            var user = client.guilds.cache.get(queue.voiceChannel.guildId).members.cache.get(song.user.id).user;
+            await queue.skip(voiceChannel);
             var embed = new MessageEmbed()
                 .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
+                .setAuthor({ name: `Requested by: ${user.username}#${user.discriminator}`, iconURL: user.avatarURL() })
+                .setURL(song.url)
+                .setTitle(`Skipped: ${song.name}`)
+                .setDescription(`⏩ | \`${song.name}\` has been skipped.`)
+                .setThumbnail(song.thumbnail)
+                .setFooter({text: `${member.user.username}#${member.user.discriminator}`, iconURL: member.avatarURL()})
+                .setTimestamp()
 
             return interaction.reply({ embeds: [embed] })
 

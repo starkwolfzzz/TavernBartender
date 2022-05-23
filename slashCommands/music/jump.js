@@ -1,25 +1,12 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
+    name: "jump",
+    description: "Jump to a song in the queue",
     options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
-        type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
-        ]
+        name: "to",
+        description: "Number of song to jump to (The next one is 1, 2,... The previous one is -1, -2,...)",
+        type: "INTEGER"
     }],
     /**
      * @param {CommandInteraction} interaction
@@ -28,8 +15,6 @@ module.exports = {
      */
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
 
         const voiceChannel = member.voice.channel;
 
@@ -56,32 +41,30 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
-            var embed = new MessageEmbed()
-                .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+        const index = options.getInteger("to");
+        if (index === 0) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Cannot jump to current song.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        }
+
+        if (index < 0 && !queue.previousSongs[Math.abs(index) - 1]) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Song #${index} doesn't exist.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        } else if (index > 0 && !queue.songs[index]) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | Song #${index} doesn't exist.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
-            }
-
-            var embed = new MessageEmbed()
-                .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-
-            return interaction.reply({ embeds: [embed] })
+            await queue.jump(index);
+            return interaction.reply({ content: `☑️ | Jumped to song #${index}`})
 
         } catch (e) {
             var errorEmbed = new MessageEmbed()

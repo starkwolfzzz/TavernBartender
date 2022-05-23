@@ -30,7 +30,7 @@ module.exports = {
             }
         }
 
-        readEvents('../events')
+        readEvents('../events/client')
         console.log("|" + insertChar(" ", topEventBars - 1) + "|")
         console.log(insertChar("‾", topEventBars))
 

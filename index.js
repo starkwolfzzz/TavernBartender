@@ -35,24 +35,25 @@ const {
 const { DiscordTogether } = require('discord-together');
 client.discordTogether = new DiscordTogether(client);
 
-const { Player, RepeatMode } = require("discord-music-player");
+const { Player } = require("discord-music-player");
 const player = new Player(client, {
     leaveOnEnd: false,
     leaveOnStop: false,
     deafenOnJoin: true,
-    quality: `low`,
+    quality: `high`,
     leaveOnEmpty: false,
 });
 
 player.on('queueEnd', (q) => q.stop())
     .on('songChanged', (q, newSong, oldSong) => {
-        if(q.data.channel) q.data.channel.send(`:thumbsup: Now Playing ***${newSong.name}***`)
+        if (q.data.channel) q.data.channel.send(`:thumbsup: Now Playing ***${newSong.name}***`)
     }).on('songAdd', (q, song) => {
-        if(q.data.channel) if (q.songs.length > 1) q.data.channel.send(`:thumbsup: Added ***${song.name}*** to the queue`)
+        if (q.data.channel)
+            if (q.songs.length > 1) q.data.channel.send(`:thumbsup: Added ***${song.name}*** to the queue`)
     }).on('playlistAdd', (q, playlist) => {
-        if(q.data.channel) q.data.channel.send(`:thumbsup: Added playlist ***${playlist}*** with ${playlist.songs.length} to the queue.`)
+        if (q.data.channel) q.data.channel.send(`:thumbsup: Added playlist ***${playlist}*** with ${playlist.songs.length} to the queue.`)
     }).on('songFirst', (q, song) => {
-        if(q.data.channel) q.data.channel.send(`:thumbsup: Now Playing ***${song.name}***`)
+        if (q.data.channel) q.data.channel.send(`:thumbsup: Now Playing ***${song.name}***`)
     }).on('error', (error, q) => {
         console.log(`Error: ${error} in ${q.guild.name}`);
     }).on('channelEmpty', (q) => {
@@ -66,12 +67,36 @@ client.player = player;
 const fs = require('fs');
 const path = require('path');
 
+const { DisTube } = require('distube');
+const { SpotifyPlugin }   = require('@distube/spotify')
+
+client.genius = process.env.GENIUS_TOKEN
+client.distube = new DisTube(client, {
+    emitNewSongOnly: true,
+    leaveOnEmpty: true,
+    leaveOnStop: false,
+    emitAddSongWhenCreatingQueue: false,
+    updateYouTubeDL: false,
+    emptyCooldown: 300,
+    youtubeDL: false,
+    plugins: [new SpotifyPlugin({
+        emitEventsAfterFetching: false,
+        api: {
+          clientId: process.env['SPOTIFYID'],
+          clientSecret: process.env['SPOTIFYSECRET'],
+        },
+      })]
+})
+module.exports = client;
+require('./events/distube/distubeEvents.js')
+
 client.ttsPlayer = createAudioPlayer();
 
 var loop = "none";
 client.loop = loop;
 
 const mongoose = require("mongoose");
+const { config } = require('dotenv');
 
 mongoose.connect(process.env.MONGODB_SRV, {
     useNewUrlParser: true,
@@ -139,10 +164,14 @@ readHandlers('handlers')
 
 client.login(process.env['TOKEN']);
 
-exports.changeCfg = function(prefix, volume) {
+client.on(`rateLimit`, (data) => {
+    console.log(data)
+})
+
+module.exports.changeCfg = function(prefix, volume) {
     changeConfig({ prefix, volume })
 }
 
-exports.changeAFK = function(userId, userName, type = "add") {
+module.exports.changeAFK = function(userId, userName, type = "add") {
     changeAFK(userId, userName, type = "add")
 }

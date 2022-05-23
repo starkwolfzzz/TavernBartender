@@ -114,7 +114,7 @@ module.exports = {
 
             const connection1 = getVoiceConnection(voiceChannel.guild.id);
             var resource = createAudioResource(path, { inlineVolume: true });
-            resource.volume.setVolume(client.volume / 100);
+            resource.volume.setVolume((await guildSchema.find({guildID: interaction.guild.id,}))[0].guildVolume / 100);
             await client.ttsPlayer.play(resource);
             connection1.subscribe(client.ttsPlayer);
 

@@ -1,22 +1,15 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
-const guildSchema = require("../../schemas/guildSchema")
 
 module.exports = {
-    name: "play",
-    description: "Play a song or playlist",
-    options: [{
-        name: "query",
-        description: "Provide a name or URL for the song or playlist",
-        type: "STRING",
-        required: true
-    }],
+    name: "previous",
+    description: "Play the previous song",
     /**
      * @param {CommandInteraction} interaction
      * @param {Client} client
      * @returns
      */
     async execute(client, interaction) {
-        const { options, member, guild, channel } = interaction;
+        const { member, guild, channel } = interaction;
 
         const voiceChannel = member.voice.channel;
 
@@ -30,16 +23,30 @@ module.exports = {
         if (guild.me.voice.channelId && voiceChannel.id !== guild.me.voice.channelId) {
             var errorEmbed = new MessageEmbed()
                 .setColor("RED")
-                .setDescription(`❌ | I'm already playing music in <#${guild.me.voice.channelId}>.`)
+                .setDescription(`❌ | You must be in my current voice channel to do that.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        }
+
+        const queue = await client.distube.getQueue(voiceChannel);
+
+        if (!queue) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | There is nothing playing.`)
+            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+        }
+
+        if (queue.previousSongs.length < 1) {
+            var errorEmbed = new MessageEmbed()
+                .setColor("RED")
+                .setDescription(`❌ | There are no previously played songs in this session.`)
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
         try {
 
-            interaction.reply({ content: `☑️ | Adding ${options.getString("query")} to the queue.`, ephemeral: true })
-            client.distube.play(voiceChannel, options.getString("query"), { textChannel: channel, member: member }).then(async () => {
-                (await client.distube.setVolume(guild.id, parseInt((await guildSchema.find({guildID: guild.id}))[0].guildVolume)))
-            });
+            queue.previous()
+            interaction.reply({ content: `☑️ | Replaying the previous song from the queue.`})
 
         } catch (e) {
             var errorEmbed = new MessageEmbed()
@@ -47,7 +54,7 @@ module.exports = {
                 .setDescription(`❌ | An Unexpected Error Occured: ${e.toString().slice(0, 4000)}`)
 
             console.log(e)
-            return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
+            return interaction.reply({ embeds: [errorEmbed] })
         }
     }
 }

@@ -1,24 +1,29 @@
 const { CommandInteraction, MessageEmbed, Client } = require('discord.js')
 
 module.exports = {
-    name: "loop",
-    description: "Get or set music loop",
+    name: "filters",
+    description: "Get or set music filters",
     options: [{
-        name: "type",
-        description: "The type of the loop to use on the music",
+        name: "filter",
+        description: "Filter to add",
         type: "STRING",
-        choices: [{
-                name: "None",
-                value: "none"
-            },
-            {
-                name: "Song",
-                value: "song"
-            },
-            {
-                name: "Queue",
-                value: "queue"
-            }
+        choices: [{ name: "3D", value: "3d" },
+            { name: "Bass Boost", value: "bassboost" },
+            { name: "Echo", value: "echo" },
+            { name: "Karaoke", value: "karaoke" },
+            { name: "Nightcore", value: "nightcore" },
+            { name: "Vaporwave", value: "vaporwave" },
+            { name: "Flanger", value: "flanger" },
+            { name: "Gate", value: "gate" },
+            { name: "Haas", value: "haas" },
+            { name: "Reverse", value: "reverse" },
+            { name: "Surround", value: "surround" },
+            { name: "Mcompand", value: "mcompand" },
+            { name: "Phaser", value: "phaser" },
+            { name: "Tremolo", value: "tremolo" },
+            { name: "Earwax", value: "earwax" },
+            { name: "Off", value: "off" },
+            
         ]
     }],
     /**
@@ -28,8 +33,6 @@ module.exports = {
      */
     async execute(client, interaction) {
         const { options, member, guild, channel } = interaction;
-
-        loop = options.getString("type");
 
         const voiceChannel = member.voice.channel;
 
@@ -56,32 +59,31 @@ module.exports = {
             return interaction.reply({ embeds: [errorEmbed], ephemeral: true })
         }
 
-        if (!interaction.options.getString("type")) {
+        if (!options.getString("filter")) {
             var embed = new MessageEmbed()
                 .setColor("BLUE")
-                .setDescription(`🔁 | Current loop type set to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-            return interaction.reply({ embeds: [embed], ephemeral: true })
+                .setDescription(`☑️ | Current Queue Filters: \`${queue.filters.join(', ') || 'Off'}\``)
+
+            return interaction.reply({ embeds: [embed] })
         }
 
         try {
 
-            switch (interaction.options.getString("type")) {
-                case "none":
-                    await queue.setRepeatMode(0);
-                    break;
-                case "song":
-                    await queue.setRepeatMode(1);
-                    break;
-                case "queue":
-                    await queue.setRepeatMode(2);
-                    break;
+            if(options.getString("filter") != "off"){
+                queue.setFilter(options.getString("filter"))
+                var embed = new MessageEmbed()
+                    .setColor("GREEN")
+                    .setDescription(`☑️ | Added Queue Filter: \`${options.getString("filter")}\``)
+    
+                interaction.reply({ embeds: [embed] })
+            } else {
+                queue.setFilter(false)
+                var embed = new MessageEmbed()
+                    .setColor("GREEN")
+                    .setDescription(`☑️ | Disabled all current queue filters.`)
+    
+                interaction.reply({ embeds: [embed] })
             }
-
-            var embed = new MessageEmbed()
-                .setColor("GREEN")
-                .setDescription(`☑️ | Set loop type to: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Queue' : 'Song') : 'None'}\``)
-
-            return interaction.reply({ embeds: [embed] })
 
         } catch (e) {
             var errorEmbed = new MessageEmbed()
