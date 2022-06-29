@@ -1,10 +1,16 @@
 const GUILD_ID = process.env['GUILD_ID'];
 const { MessageEmbed } = require('discord.js');
+const guildSchema = require("../../../schemas/guildSchema")
 
 module.exports = {
     name: 'messageCreate',
     async execute(client, message) {
         if (message.author.bot) return;
+        const searchById = guildSchema.find({
+            guildID: process.env["GUILD_ID"]
+        })
+
+        var prefix = (await searchById)[0].guildPrefix;
 
         if (message.channel.type === "DM") {
             if (client.guilds.cache.find(guild => guild.id === GUILD_ID).members.cache.find(m => m.id === message.author.id)) {
@@ -27,7 +33,7 @@ module.exports = {
                         const ticketMsg = new MessageEmbed()
                             .setColor("F9A602")
                             .setTitle("New Ticket")
-                            .setDescription(`Type a message in this channel to reply. Messages starting with the bot prefix ` + "`" + `${client.prefix}` + "`" + ` are ignored, and can be used for staff discussion. Use the command ` + "`" + `${client.prefix}close [reason]` + "`" + ` to close this ticket.`)
+                            .setDescription(`Type a message in this channel to reply. Messages starting with the bot prefix ` + "`" + `${prefix}` + "`" + ` are ignored, and can be used for staff discussion. Use the command ` + "`" + `${prefix}close [reason]` + "`" + ` to close this ticket.`)
                             .addFields({
                                 name: 'User',
                                 value: `<@${message.author.id}> (${message.author.id})`,
@@ -105,7 +111,7 @@ module.exports = {
 
         let mmbr = client.guilds.cache.find(guild => guild.id === GUILD_ID).members.cache.find(m => m.id === message.channel.name.substring(message.channel.name.indexOf("-") + 1));
         if (mmbr != null && message.channel.parent.name == "Mod Mail") {
-            if (!message.content.startsWith(client.prefix)) {
+            if (!message.content.startsWith(prefix)) {
                 const sentMsg = new MessageEmbed()
                     .setColor("FF0000")
                     .setAuthor(`${message.author.username}#${message.author.discriminator}`, `${message.author.avatarURL()}`)
@@ -139,7 +145,7 @@ module.exports = {
 
                 message.delete();
             } else {
-                args = message.content.slice(client.prefix.length).split(/ +/);
+                args = message.content.slice(prefix.length).split(/ +/);
                 const command = args.shift().toLowerCase();
 
                 if (command == "close") {
@@ -148,10 +154,10 @@ module.exports = {
                     else reason = args.join(" ")
 
                     const closeTicketMsg = new MessageEmbed()
-                        .setColor("FF0000")
+                        .setColor("FFA500")
                         .setAuthor(`${message.author.username}#${message.author.discriminator}`, `${message.author.avatarURL()}`)
                         .setTitle("Ticket Closed")
-                        .setDescription(`${reason}`)
+                        .setDescription(`**Reason**: ${reason}`)
                         .setTimestamp()
                         .setFooter(`${message.guild.name} | ${message.guild.id}`, `${message.guild.iconURL()}`);
                     mmbr.send({ embeds: [closeTicketMsg] })

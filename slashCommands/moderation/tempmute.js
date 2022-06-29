@@ -53,7 +53,7 @@ module.exports = {
             required: false
         },
     ],
-    Perms: "ADMINISTRATOR",
+    default_member_permissions: "0",
     async execute(client, interaction) {
         var reason = "";
         if (interaction.options.getString(reason) != null) reason = "because " + interaction.options.getString('reason');

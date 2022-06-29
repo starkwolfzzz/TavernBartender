@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 25623;
 
 app.get('/', (req, res) => res.send('Tavern Bartender#8741 is online and is streaming with @Stark Wolfz#9300'));
 
@@ -66,6 +66,10 @@ client.player = player;
 
 const fs = require('fs');
 const path = require('path');
+
+if(fs.existsSync("./dev")){
+    client.devMode = true;
+}
 
 const { DisTube } = require('distube');
 const { SpotifyPlugin }   = require('@distube/spotify')

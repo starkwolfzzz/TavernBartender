@@ -32,7 +32,7 @@
                 required: true
             },
         ],
-        Perms: "ADMINISTRATOR",
+        default_member_permissions: "0",
         async execute(client, interaction) {
             var type = interaction.options.getString("type");
             const embed = new MessageEmbed()
