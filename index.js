@@ -69,6 +69,7 @@ const path = require('path');
 
 if(fs.existsSync("./.dev")){
     client.devMode = true;
+    console.info("perhaps")
 }
 
 const { DisTube } = require('distube');
