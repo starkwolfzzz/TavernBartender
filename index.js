@@ -67,7 +67,7 @@ client.player = player;
 const fs = require('fs');
 const path = require('path');
 
-if(fs.existsSync("./dev")){
+if(fs.existsSync("./.dev")){
     client.devMode = true;
 }
 
