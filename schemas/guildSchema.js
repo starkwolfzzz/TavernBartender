@@ -15,7 +15,8 @@ const guildSchema = mongoose.Schema({
     guildID: reqString,
     guildName: reqString,
     guildPrefix: reqString,
-    guildVolume: reqString
+    guildVolume: reqString,
+    guildPlayChannelType: reqString
 })
 
 module.exports = mongoose.model('guilds', guildSchema)

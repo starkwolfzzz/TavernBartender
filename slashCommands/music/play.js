@@ -39,7 +39,18 @@ module.exports = {
             interaction.reply({ content: `☑️ | Adding ${options.getString("query")} to the queue.`, ephemeral: true })
             client.distube.play(voiceChannel, options.getString("query"), { textChannel: channel, member: member }).then(async () => {
                 (await client.distube.setVolume(guild.id, parseInt((await guildSchema.find({guildID: guild.id}))[0].guildVolume)))
-            });
+            }).catch((e) => {
+                var errorEmbed = new MessageEmbed()
+                  .setColor("RED")
+                  .setDescription(
+                    `❌ | An Unexpected Error Occured: ${e
+                      .toString()
+                      .slice(0, 4000)}`
+                  );
+
+                console.log(e);
+                return message.reply({ embeds: [errorEmbed] });
+              });
 
         } catch (e) {
             var errorEmbed = new MessageEmbed()

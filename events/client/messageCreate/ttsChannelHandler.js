@@ -18,66 +18,19 @@ module.exports = {
 
         if (message.channel.type === "DM") return;
 
+        const searchById = guildSchema.find({
+            guildID: message.guild.id
+        })
+
+        var prefix = (await searchById)[0].guildPrefix;
+
+        if (message.content.startsWith(prefix)) return;
+
         var args;
         var voiceChannel;
 
         switch (message.channel.name) {
-            /*case "play":
-                if (message.content.startsWith("https://") || message.content.startsWith("http://")) {
-                    if (message.content.includes("youtu.be") || message.content.includes("youtube.com") || message.content.includes("spotify.com")) {
-                        let guildQueue = client.player.getQueue(message.guild.id);
-                        const voiceChannel = message.member.voice.channel;
-                        var isYt = false;
-                        if ((message.content.includes("youtu"))) isYt = true;
-
-                        if (voiceChannel != null) {
-                            if (message.content.includes("&list=") || message.content.includes("playlist")) {
-                                let queue = client.player.createQueue(message.guild.id);
-                                queue.setData({ channel: message.channel })
-                                await queue.join(voiceChannel);
-                                let song = await queue.playlist(message.content).catch(_ => {
-                                    if (!guildQueue)
-                                        queue.stop();
-                                });
-
-                                queue.setVolume((await guildSchema.find({ guildID: message.guild.id }))[0].guildVolume)
-
-                                if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
-                                else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)
-                                message.react("✅")
-                            } else if (message.content.includes("album")) {
-                                await message.reply(`⛔ Cannot play spotify albums`)
-                            } else {
-                                var playMsg = message.content;
-                                if (isYt) {
-                                    const current_url = new URL(playMsg);
-                                    const search_params = current_url.searchParams;
-                                    playMsg = search_params.get('v')
-                                }
-
-                                let queue = client.player.createQueue(message.guild.id);
-                                queue.setData({ channel: message.channel })
-                                await queue.join(voiceChannel);
-                                let song = await queue.play(playMsg).catch(_ => {
-                                    if (!guildQueue)
-                                        queue.stop();
-                                });
-
-                                queue.setVolume((await guildSchema.find({ guildID: message.guild.id }))[0].guildVolume)
-
-                                //if (guildQueue == null || guildQueue.nowPlaying == song) await message.reply(`:thumbsup: Now Playing ***${song.name}***`)
-                                //else await message.reply(`:thumbsup: Added ***${song.name}*** to the queue`)
-                                message.react("✅")
-                            }
-                        } else {
-                            await message.reply(`⛔ You must be in a voice channel to play music`)
-                        }
-                    } else {
-                        await message.reply(`⛔ Please enter a valid video url`)
-                    }
-                }
-                break;*/
-            /*case "tts":
+            case "tts":
                 args = message.content.split(/ +/);
                 voiceChannel = message.member.voice.channel;
                 if (voiceChannel != null) {
@@ -184,7 +137,7 @@ module.exports = {
                         message.channel.send(`⛔ ***Error***: Couldn't play ${path}.`)
                     });
                 }
-                break;*/
+                break;
                 /*case "tips-tts":
 					args = message.content.split(/ +/);
 					voiceChannel = message.member.voice.channel;
@@ -293,11 +246,6 @@ module.exports = {
 						});
 					}
 					break;*/
-            /*case "announcements":
-                if (message.channel.id === "757302622842781699") {
-                    message.crosspost()
-                }
-                break;*/
         }
     },
 };

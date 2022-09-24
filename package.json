@@ -12,7 +12,7 @@
     "@discordjs/opus": "^0.5.3",
     "@discordjs/rest": "0.1.0-canary.0",
     "@discordjs/voice": "^0.7.5",
-    "@distube/spotify": "^1.1.0",
+    "@distube/spotify": "^1.4.2",
     "@distube/yt-dlp": "^0.0.2",
     "@promises/timer": "^0.5.0",
     "async-wait-until": "^2.0.12",
@@ -35,6 +35,7 @@
     "node.js": "^0.0.1-security",
     "opusscript": "^0.0.8",
     "request": "^2.88.2",
+    "uberduck-api": "^1.2.2",
     "yt-search": "^2.10.3",
     "ytdl-core": "^4.10.0"
   },

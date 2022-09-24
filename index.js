@@ -35,35 +35,6 @@ const {
 const { DiscordTogether } = require('discord-together');
 client.discordTogether = new DiscordTogether(client);
 
-const { Player } = require("discord-music-player");
-const player = new Player(client, {
-    leaveOnEnd: false,
-    leaveOnStop: false,
-    deafenOnJoin: true,
-    quality: `high`,
-    leaveOnEmpty: false,
-});
-
-player.on('queueEnd', (q) => q.stop())
-    .on('songChanged', (q, newSong, oldSong) => {
-        if (q.data.channel) q.data.channel.send(`:thumbsup: Now Playing ***${newSong.name}***`)
-    }).on('songAdd', (q, song) => {
-        if (q.data.channel)
-            if (q.songs.length > 1) q.data.channel.send(`:thumbsup: Added ***${song.name}*** to the queue`)
-    }).on('playlistAdd', (q, playlist) => {
-        if (q.data.channel) q.data.channel.send(`:thumbsup: Added playlist ***${playlist}*** with ${playlist.songs.length} to the queue.`)
-    }).on('songFirst', (q, song) => {
-        if (q.data.channel) q.data.channel.send(`:thumbsup: Now Playing ***${song.name}***`)
-    }).on('error', (error, q) => {
-        console.log(`Error: ${error} in ${q.guild.name}`);
-    }).on('channelEmpty', (q) => {
-        q.stop();
-        q.data.channel.send(`Everyone left the voice channel, queue ended`)
-    }).on('clientDisconnect', (q) => {
-        q.data.channel.send(`I was kicked from the Voice Channel, queue ended.`)
-    });
-client.player = player;
-
 const fs = require('fs');
 const path = require('path');
 
@@ -74,7 +45,7 @@ if(fs.existsSync("./.dev")){
 const { DisTube } = require('distube');
 const { SpotifyPlugin }   = require('@distube/spotify')
 
-client.genius = process.env.GENIUS_TOKEN
+client.genius = process.env.GENIUS_TOKEN;
 client.distube = new DisTube(client, {
     emitNewSongOnly: true,
     leaveOnEmpty: true,
@@ -168,9 +139,9 @@ readHandlers('handlers')
 
 client.login(process.env['TOKEN']);
 
-client.on(`rateLimit`, (data) => {
+/*client.on(`rateLimit`, (data) => {
     console.log(data)
-})
+})*/
 
 module.exports.changeCfg = function(prefix, volume) {
     changeConfig({ prefix, volume })

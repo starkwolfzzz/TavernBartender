@@ -31,7 +31,7 @@ module.exports = {
 
     //Slash commands
     topBars = 60;
-    console.log(insertChar("_", topBars));
+    console.log(" " + insertChar("_", (topBars - 1)));
     console.log(
       "|" +
         insertChar(
@@ -79,16 +79,13 @@ module.exports = {
 
     var bar = new Promise(async (resolve, reject) => {
       var size = client.guilds.cache.size;
-      var sizeW = size - 1;
-      var n = 0;
-      for (i = 0; i < size; i++) {
+      for (p = 0; p < size; p++) {
         const mainGuild = client.devMode ? client.guilds.cache.get(process.env["GUILD_ID"]) : (client.guilds.cache.get(
-          client.guilds.cache.map((guild) => guild.id)[i]
+          client.guilds.cache.map((guild) => guild.id)[p]
         ));
 
         if(client.devMode) {
-          i = size;
-          n = sizeW;
+          p = size - 1;
         }
         
         //Check if guild exists on database
@@ -96,24 +93,23 @@ module.exports = {
           guildID: mainGuild.id,
         });
 
-        if ((await searchById).length == 0) {
+        var queryResult = (await searchById)[0];
+
+        if (queryResult.length == 0) {
           const guild = {
             docID: await guildSchema.countDocuments(),
             guildID: mainGuild.id,
             guildName: mainGuild.name,
             guildPrefix: config.prefix,
             guildVolume: config.volume,
+            guildPlayChannelType: config.playChannelType
           };
 
           await new guildSchema(guild).save();
         }
 
         //Check if guild name changed on database
-        searchById = guildSchema.find({
-          guildID: mainGuild.id,
-        });
-
-        if ((await searchById)[0].guildName != mainGuild.name) {
+        if (queryResult.guildName != mainGuild.name) {
           await guildSchema.updateOne(
             {
               guildID: mainGuild.id,
@@ -124,9 +120,20 @@ module.exports = {
           );
         }
 
-        mainGuild.commands
-          .set(client.slashCommands)
-          .then((cmd) => {
+        //Check if the already existing guilds have a value for the new field
+        if(queryResult.guildPlayChannelType == undefined){
+          await guildSchema.updateOne(
+            {
+              guildID: mainGuild.id,
+            },
+            {
+              guildPlayChannelType: config.playChannelType,
+            }
+          );
+        }
+
+
+        await mainGuild.commands.set(client.slashCommands).then((cmd) => {
             const Roles = (commandName) => {
               const cmdPerms = client.slashCommands.find(
                 (c) => c.name === commandName
@@ -139,56 +146,51 @@ module.exports = {
               );
             };
 
-            var neededSpace1 = Math.round(
-              (topBars - 1 - mainGuild.name.length) / 2
-            );
+            var guildName = mainGuild.name;
+
+            if(mainGuild.name.length > (topBars-2)){
+              guildName = mainGuild.name.substring(0, 54) + "...";
+            }
+
+            var neededSpace1 = ((topBars - 1 - guildName.length) / 2) === 1/2 ? (Math.floor((topBars - 1 - guildName.length) / 2)) : (Math.round((topBars - 1 - guildName.length) / 2));
             var neededSpace2 = Math.floor(
-              (topBars - 1 - mainGuild.name.length) / 2
+              (topBars - 1 - guildName.length) / 2
             );
             console.log(
               "|" +
                 insertChar(" ", neededSpace1) +
                 "\x1b[32m" +
-                mainGuild.name +
+                guildName +
                 "\x1b[0m" +
                 insertChar(" ", neededSpace2) +
                 "|"
             );
-            if (n == sizeW) {
-              resolve();
-            } else {
-              n += 1;
-            }
-          })
-          .catch((error) => {
+          }).catch((error) => {
+            var guildName = mainGuild.name;
+            
             errors += error;
-            var neededSpace1 = Math.round(
-              (topBars - 1 - mainGuild.name.length) / 2
-            );
+            var neededSpace1 = (((topBars - 1 - guildName.length) / 2) === 1) ? (Math.floor((topBars - 1 - guildName.length) / 2)) : (Math.round((topBars - 1 - guildName.length) / 2));
             var neededSpace2 = Math.floor(
-              (topBars - 1 - mainGuild.name.length) / 2
+              (topBars - 1 - guildName.length) / 2
             );
             console.log(
               "|" +
                 insertChar(" ", neededSpace1) +
                 "\x1b[31m" +
-                mainGuild.name +
+                guildName +
                 "\x1b[0m" +
                 insertChar(" ", neededSpace2) +
                 "|"
             );
-            if (n == sizeW) {
-              resolve();
-            } else {
-              n += 1;
-            }
           });
+
+          if(p == (size - 1)) resolve();
       }
     });
 
     bar.then(() => {
       console.log("|" + insertChar(" ", topBars - 1) + "|");
-      console.log(insertChar("‾", topBars));
+      console.log(" " + insertChar("‾", (topBars - 1)));
 
       console.info(
         `\x1b[33m${client.user.tag} \x1b[0mis \x1b[32m${client.user.presence.status} \x1b[0mand is \x1b[35m${type} ${client.user.presence.activities[0]}\x1b[0m`

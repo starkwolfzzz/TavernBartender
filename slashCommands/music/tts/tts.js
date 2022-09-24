@@ -10,6 +10,8 @@ const {
 const request = require(`request`);
 const fs = require(`fs`);
 
+const guildSchema = require("../../../schemas/guildSchema")
+
 module.exports = {
     name: "tts",
     description: "/tts {voice} {text}",
