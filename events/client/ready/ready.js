@@ -3,6 +3,7 @@ const config = require("../../../config.json");
 const { Client } = require(`discord.js`);
 const express = require("express");
 const app = express();
+const port = 25623;
 
 var errors = "";
 
@@ -200,6 +201,7 @@ module.exports = {
           `${client.user.tag} is ${client.user.presence.status} and is ${type} ${client.user.presence.activities[0]}`
         )
       );
+      app.listen(port /*, () => console.log(`app listening at http://localhost:${port}`)*/ );
 
       if (errors != "") console.log(errors);
 

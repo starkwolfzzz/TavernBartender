@@ -1,10 +1,5 @@
 const express = require('express');
 const app = express();
-const port = 25623;
-
-app.get('/', (req, res) => res.send('Tavern Bartender#8741 is online and is streaming with @Stark Wolfz#9300'));
-
-app.listen(port /*, () => console.log(`app listening at http://localhost:${port}`)*/ );
 
 // ================= START BOT CODE ===================
 
