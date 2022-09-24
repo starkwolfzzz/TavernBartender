@@ -39,6 +39,7 @@ if(fs.existsSync("./.dev")){
 
 const { DisTube } = require('distube');
 const { SpotifyPlugin }   = require('@distube/spotify')
+const { YtDlpPlugin } = require("@distube/yt-dlp");
 
 client.genius = process.env.GENIUS_TOKEN;
 client.distube = new DisTube(client, {
@@ -46,7 +47,6 @@ client.distube = new DisTube(client, {
     leaveOnEmpty: true,
     leaveOnStop: false,
     emitAddSongWhenCreatingQueue: false,
-    updateYouTubeDL: false,
     emptyCooldown: 300,
     youtubeDL: false,
     plugins: [new SpotifyPlugin({
@@ -55,7 +55,7 @@ client.distube = new DisTube(client, {
           clientId: process.env['SPOTIFYID'],
           clientSecret: process.env['SPOTIFYSECRET'],
         },
-      })]
+      }), new YtDlpPlugin({ update: true })]
 })
 module.exports = client;
 require('./events/distube/distubeEvents.js')
