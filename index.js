@@ -73,9 +73,10 @@ mongoose.connect(process.env.MONGODB_SRV, {
     useUnifiedTopology: true,
     keepAlive: true
 }).then(async() => {
-    //console.log("connected to mongodb database");
+    client.databaseStatus = "Connected";
 }).catch((err) => {
     console.log(err);
+    client.databaseStatus = `Error: ${err}`;
 })
 
 client.mongoose = mongoose;

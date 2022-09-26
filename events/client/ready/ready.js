@@ -207,6 +207,9 @@ module.exports = {
 
       if (client.devMode)
         console.info("Development Mode is \x1b[32mEnabled\x1b[0m!");
+
+      if (client.databaseStatus == "Connected") console.info("Database \x1b[32mConnected\x1b[0m!");
+      else console.info(`\x1b[31mFailed\x1b[0m to connect to \x1b[31mdatabase\x1b[0m!\n ${client.databaseStatus}`);
     });
 
     function insertChar(char, frequency) {
