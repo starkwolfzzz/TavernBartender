@@ -107,11 +107,7 @@ module.exports = {
                 },
                 {
                     name: '🌡️ Temperature',
-                    value: `Current: ${temp.normal}°C (feels like ${feelsLike.normal}°C)
-                    Highest: ${temp.max}°C (feels like ${feelsLike.max}°C)
-                    Lowest: ${temp.min}°C (feels like ${feelsLike.min}°C)
-                    Humidity: ${temp.humidity}%
-                    UV Index: ${uvIndex}`,
+                    value: `Current: ${temp.normal}°C (feels like ${feelsLike.normal}°C)\nHighest: ${temp.max}°C (feels like ${feelsLike.max}°C)\nLowest: ${temp.min}°C (feels like ${feelsLike.min}°C)\nHumidity: ${temp.humidity}%\nUV Index: ${uvIndex}`,
                     inline: true
                 });
 
@@ -140,8 +136,7 @@ module.exports = {
                 for(i = 0; i < Alerts.length; i++){
                     msgEmbed.addFields({
                         name: `⚠️ ${convertToTitleCase(Alerts[i].event)}`,
-                        value: `${Alerts[i].desc} Starts on ${Alerts[i].onsetTime} and ends on ${Alerts[i].endTime}.
-                                [Source](${Alerts[i].link}) (ID: ${Alerts[i].id}) (${Alerts[i].language})`
+                        value: `${Alerts[i].desc} Starts on ${Alerts[i].onsetTime} and ends on ${Alerts[i].endTime}.\n[Source](${Alerts[i].link}) (ID: ${Alerts[i].id}) (${Alerts[i].language})`
                     });
                 }
 
