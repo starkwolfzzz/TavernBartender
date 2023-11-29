@@ -1,0 +1,18 @@
+{
+    "snow": "fffafa",
+    "snow-showers-day": "0093af",
+    "snow-showers-night": "0093af",
+    "thunder-rain": "C4D3DF",
+    "thunder-showers-day": "C4D3DF",
+    "thunder-showers-night": "C4D3DF",
+    "rain": "C4D3DF",
+    "showers-day": "C4D3DF",
+    "showers-night": "C4D3DF",
+    "fog": "C9C8C7",
+    "wind": "C9C8C7",
+    "cloudy": "C9C8C7",
+    "partly-cloudy-day": "C9C8C7",
+    "partly-cloudy-night": "C9C8C7",
+    "clear-day": "87ceeb",
+    "clear-night": "87ceeb"
+}
