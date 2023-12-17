@@ -17,7 +17,8 @@ module.exports = {
                 guildID: mainGuild.id,
                 guildName: mainGuild.name,
                 guildPrefix: config.prefix,
-                guildVolume: config.volume
+                guildVolume: config.volume,
+                guildPlayChannelType: config.playChannelType,
             }
 
             await new guildSchema(guild).save()
