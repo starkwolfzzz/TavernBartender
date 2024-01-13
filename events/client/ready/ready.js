@@ -3,7 +3,7 @@ const config = require("../../../config.json");
 const { Client } = require(`discord.js`);
 const express = require("express");
 const app = express();
-const port = 25623;
+const port = 25590;
 
 var errors = "";
 
